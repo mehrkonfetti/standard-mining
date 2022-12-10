@@ -1,0 +1,9 @@
+nltk
+HanTa
+SoMeWeTa
+germalemma
+iwnlp
+simplemma
+compound-split
+german-compound-splitter
+pyahocorasick

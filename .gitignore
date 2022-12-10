@@ -1,2 +1,12 @@
-subprojects/*
-data/*
+subprojects/million-post-corpus/*
+subprojects/stopwords/*
+stanford-corenlp-full-2018-02-27/*
+subprojects/german/*
++subprojects/german/austriazismen.txt
++subprojects/german/german_utf8_linux.dic
+subprojects/IWNLP.Lemmatizer_20181001.json
+data/million_post_corpus/
+subprojects/german_newspaper_2020-05-28.model
+subprojects/stanford-german-corenlp-2018-02-27-models.jar
+code/__pycache__/*
+code/__pycache__/conf.cpython-310.pyc
