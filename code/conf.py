@@ -7,6 +7,6 @@ STOPWORDREMOVER = "stop-words" # option are "stop-words" and "german-stopwords-p
 POS_TAGGER = "someweta" # options are "hanta" and "someweta" and "stanford"
 STEMMING_OR_LEMMATIZING = "lemmatizing" # options are "stemming" and "lemmatizing"
 STEMMER = "snowball" # options are "cistem" and "snowball" and "snowball_swedish"
-LEMMATIZER = "simplemma" # options are "germalemma" and "iwnlp" and "simplemma"
+LEMMATIZER = "germalemma" # options are "germalemma" and "iwnlp" and "simplemma"
 SPLIT_COMPOUND = True # whether or not to split compound words and put them in as separate words
 SPLITTER = "german-compound-splitter" # options are "compound-split" and "german-compound-splitter"
