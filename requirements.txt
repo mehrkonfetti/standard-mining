@@ -7,3 +7,4 @@ simplemma
 compound-split
 german-compound-splitter
 pyahocorasick
+pandas

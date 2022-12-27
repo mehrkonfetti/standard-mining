@@ -1,7 +1,7 @@
 import sqlite3
-import conf
-import re
 from datetime import datetime
+import re
+import conf
 import nltk
 import simplemma
 from germalemma import GermaLemma
@@ -12,17 +12,18 @@ from someweta import ASPTagger
 from nltk.parse import CoreNLPParser
 from HanTa import HanoverTagger
 
+
 def get_articles(input_corpus):
     """
     takes: the sqlite3 corpus
     returns: a list of articles
     """
-    query_fetch_articles = 'SELECT * FROM Articles;' # extract the full Articles table
+    query_fetch_articles = 'SELECT * FROM Articles;'  # extract the full Articles table
     cursor_corpus = input_corpus.cursor()
     cursor_corpus.execute(query_fetch_articles)
     if conf.TESTING:
-        return cursor_corpus.fetchmany(40)
-    return cursor_corpus.fetchall() # return list of Rows
+        return cursor_corpus.fetchmany(100)
+    return cursor_corpus.fetchall()  # return list of Rows
 
 
 def clean_paths(paths_as_str):
@@ -34,11 +35,27 @@ def clean_paths(paths_as_str):
     for path in paths_as_str:
         # make sure the paths are in the right format of text/text/text
         if re.match(r'^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*$', path):
-            path_fixed = path.casefold() # more aggressive version of lower()
+            path_fixed = path.casefold()  # more aggressive version of lower()
             # stop germans from being germans
-            path_fixed = path_fixed.replace('ß', 'ss').replace('ä', 'ae').replace('ö', 'oe').replace('ü', 'ue')
+            path_fixed = path_fixed.replace('ß', 'ss').replace(
+                'ä', 'ae').replace('ö', 'oe').replace('ü', 'ue')
             output_paths.append(tuple(path_fixed.split('/')))
     return output_paths
+
+
+def clean_path(path_as_str):
+    """
+    takes: a path that articles reside in
+    return: a tokenized path, where every token is one step in the path
+    """
+    # make sure the paths are in the right format of text/text/text
+    if re.match(r'^[A-Za-z0-9_-]+(\/[A-Za-z0-9_-]+)*$', path_as_str):
+        path_fixed = path_as_str.casefold()  # more aggressive version of lower()
+        # stop germans from being germans
+        path_fixed = path_fixed.replace('ß', 'ss').replace(
+            'ä', 'ae').replace('ö', 'oe').replace('ü', 'ue')
+        return list(path_fixed.split('/'))
+    return None
 
 
 def clean_dates(date_strs):
@@ -46,7 +63,8 @@ def clean_dates(date_strs):
     takes: list of strings that represent dates
     returns: list of datetime objects
     """
-    output_dates = [datetime.strptime(date, "%Y-%m-%d %H:%M:%S.%f") for date in date_strs]
+    output_dates = [datetime.strptime(
+        date, "%Y-%m-%d %H:%M:%S.%f") for date in date_strs]
     return output_dates
 
 
@@ -59,13 +77,16 @@ def tokenize_strings(list_of_strings):
     for text in list_of_strings:
         tokens = text.casefold().split(' ')
         # filter out emails
-        tokens = [token for token in tokens if not re.match(r'/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi', token)]
-        tokens = [token.split('\n') for token in tokens] # remove literal newlines
-        tokens = [item for sublist in tokens for item in sublist] 
+        tokens = [token for token in tokens if not re.match(
+            r'/([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/gi', token)]
+        tokens = [token.split('\n')
+                  for token in tokens]  # remove literal newlines
+        tokens = [item for sublist in tokens for item in sublist]
         # strip any symbols, including the German Anführungszeichen
         tokens = [word.strip('.,!?:;"-–+()„“"<>\'`*') for word in tokens]
         # remove 1-letter words, only words with letters in them
-        tokens = [token for token in tokens if (len(token) > 1 and re.search(r'[a-zöüßA-ZÄÖÜ]', token))]
+        tokens = [token for token in tokens if (
+            len(token) > 1 and re.search(r'[a-zöüßA-ZÄÖÜ]', token))]
         tokens_combined.append(tokens)
     return tokens_combined
 
@@ -91,7 +112,8 @@ def split_compounds(input_list):
     """
     output_list = []
     if conf.SPLITTER == "german-compound-splitter":
-        ahocs = comp_split.read_dictionary_from_file("subprojects/german/german_utf8_linux.dic")
+        ahocs = comp_split.read_dictionary_from_file(
+            "subprojects/german/german_utf8_linux.dic")
     for tokens in input_list:
         split_tokens = []
         for token in tokens:
@@ -104,10 +126,11 @@ def split_compounds(input_list):
                     split_tokens.append(token)
             elif conf.SPLITTER == "german-compound-splitter":
                 try:
-                    split_token = comp_split.dissect(token, ahocs, only_nouns=True)
+                    split_token = comp_split.dissect(
+                        token, ahocs, only_nouns=True)
                     for section in split_token:
                         split_tokens.append(section.lower())
-                except IndexError: # token couldn't be split
+                except IndexError:  # token couldn't be split
                     split_tokens.append(token)
         output_list.append(split_tokens)
     return output_list
@@ -119,11 +142,13 @@ def remove_stopwords(input_list):
     returns: list of lists of strings
     """
     if conf.STOPWORDREMOVER == "stop-words":
-        file = open("subprojects/stopwords/stop-words/german.txt", encoding="utf8")
+        file = open("subprojects/stopwords/stop-words/german.txt",
+                    encoding="utf8")
         content = file.read()
         stopwords = content.split()
     elif conf.STOPWORDREMOVER == "german-stopwords-plain":
-        file = open("subprojects/stopwords/german_stopwords/german_stopwords_plain.txt", encoding="utf8")
+        file = open(
+            "subprojects/stopwords/german_stopwords/german_stopwords_plain.txt", encoding="utf8")
         content = file.read()
         stopwords = content.split()
     else:
@@ -131,12 +156,14 @@ def remove_stopwords(input_list):
         stopwords = []
 
     # also add english stopwords
-    file_english = open("subprojects/stopwords/stop-words/english.txt", encoding="utf8")
+    file_english = open(
+        "subprojects/stopwords/stop-words/english.txt", encoding="utf8")
     stopwords_english = file_english.read().split()
 
     output_list = []
     for tokens in input_list:
-        tokens_cleaned = [token for token in tokens if (token not in (stopwords, stopwords_english))]
+        tokens_cleaned = [token for token in tokens if (
+            token not in (stopwords, stopwords_english))]
         output_list.append(tokens_cleaned)
     return output_list
 
@@ -150,12 +177,12 @@ def get_pos_tags(input_list):
         tagger = HanoverTagger.HanoverTagger('morphmodel_ger.pgz')
         tuples = []
         for tokens in input_list:
-            tuples = []
+            tuples_sentence = []
             for token in tokens:
                 # this returns a list of the most likely tags - I'm blankly using #1
-                tags_list = tagger.tag_word(token,cutoff=0)
-                tuples.append((token, tags_list[0][0]))
-            tuples.append(tuples)
+                tags_list = tagger.tag_word(token, cutoff=0)
+                tuples_sentence.append((token, tags_list[0][0]))
+            tuples.append(tuples_sentence)
         return tuples
     if conf.POS_TAGGER == "someweta":
         model = "subprojects/german_newspaper_2020-05-28.model"
@@ -167,6 +194,7 @@ def get_pos_tags(input_list):
         return [list(tagger.tag(tokens)) for tokens in input_list]
     print("Error, unsupported POS tagger configuration!")
     return [[]]
+
 
 def get_stems(input_list):
     """
@@ -183,7 +211,8 @@ def get_stems(input_list):
         stemmer = nltk.stem.Cistem()
     output_list = []
     for tokens in input_list:
-        stemmed_tokens = [(stemmer.stem(token[0]), token[1]) for token in tokens]
+        stemmed_tokens = [(stemmer.stem(token[0]), token[1])
+                          for token in tokens]
         output_list.append(stemmed_tokens)
     return output_list
 
@@ -196,7 +225,8 @@ def get_suffixes(input_list):
     stemmer = nltk.stem.Cistem()
     output_list = []
     for tokens in input_list:
-        suffixes = [(stemmer.segment(token[0])[1], token[1]) for token in tokens]
+        suffixes = [(stemmer.segment(token[0])[1], token[1])
+                    for token in tokens]
         output_list.append(suffixes)
     return output_list
 
@@ -214,19 +244,20 @@ def get_lemmas(input_list):
             for lemmatuple in tuples:
                 try:
                     lemma = lemmatizer.find_lemma(lemmatuple[0], lemmatuple[1])
-                except ValueError: # Can only process a very limited number of tags
-                    lemma = lemmatuple[0] # use unlemmatized token
+                except ValueError:  # Can only process a very limited number of tags
+                    lemma = lemmatuple[0]  # use unlemmatized token
                 lemmatuples.append((lemma, lemmatuple[1]))
             output_list.append(lemmatuples)
         return output_list
     if conf.LEMMATIZER == "iwnlp":
-        lemmatizer = IWNLPWrapper(lemmatizer_path='subprojects/IWNLP.Lemmatizer_20181001.json')
+        lemmatizer = IWNLPWrapper(
+            lemmatizer_path='subprojects/IWNLP.Lemmatizer_20181001.json')
         output_list = []
         for tuples in input_list:
             lemmatuples = []
             for lemmatuple in tuples:
                 lemma = lemmatizer.lemmatize(lemmatuple[0], lemmatuple[1])
-                if lemma is None: # returns None for unknown words
+                if lemma is None:  # returns None for unknown words
                     # TODO: explore further which words are unknown to it - does it recognize that english words are unknown eg
                     lemma = lemmatuple[0]
                 lemmatuples.append((lemma, lemmatuple[1]))
@@ -235,7 +266,8 @@ def get_lemmas(input_list):
     if conf.LEMMATIZER == "simplemma":
         output_list = []
         for tuples in input_list:
-            lemmatuples = [(simplemma.lemmatize(tuple[0], lang='de'), tuple[1]) for tuple in tuples]
+            lemmatuples = [(simplemma.lemmatize(
+                tuple[0], lang='de'), tuple[1]) for tuple in tuples]
             output_list.append(lemmatuples)
         return output_list
     return []
@@ -250,8 +282,12 @@ def remove_html(list_of_strings):
     re_html = re.compile(r'<[^>]+>')
     return [re_html.sub('', text) for text in list_of_strings]
 
+
+def clean_title(title):
+    return remove_stopwords(tokenize_strings(title))
+
 if __name__ == '__main__':
-    connection_corpus = sqlite3.connect(conf.CORPUSDB) # load corpus database
+    connection_corpus = sqlite3.connect(conf.CORPUSDB)  # load corpus database
     connection_corpus.row_factory = conf.ROW_FACTORY
     articles = get_articles(connection_corpus)
 
@@ -267,7 +303,7 @@ if __name__ == '__main__':
     dates_clean = clean_dates(dates)
 
     titles_tokenized = tokenize_strings(titles)
-    titles_bindestrich = get_bindestrich_strings(titles) # save for later
+    titles_bindestrich = get_bindestrich_strings(titles)  # save for later
 
     if conf.SPLIT_COMPOUND:
         titles_tokenized_split = split_compounds(titles_tokenized)
@@ -276,13 +312,13 @@ if __name__ == '__main__':
     titles_pos = get_pos_tags(titles_cleaned)
 
     titles_stems = get_stems(titles_pos)
-    titles_suffixes = get_suffixes(titles_pos) # save for later
+    titles_suffixes = get_suffixes(titles_pos)  # save for later
     titles_lemmas = get_lemmas(titles_pos)
-
 
     bodies_rm_html = remove_html(bodies)
     bodies_tokenized = tokenize_strings(bodies_rm_html)
-    bodies_bindestrich = get_bindestrich_strings(bodies_rm_html) # save for later
+    bodies_bindestrich = get_bindestrich_strings(
+        bodies_rm_html)  # save for later
 
     if conf.SPLIT_COMPOUND:
         bodies_tokenized_split = split_compounds(bodies_tokenized)
@@ -291,5 +327,5 @@ if __name__ == '__main__':
     bodies_pos = get_pos_tags(bodies_cleaned)
 
     bodies_stems = get_stems(bodies_pos)
-    bodies_suffixes = get_suffixes(bodies_pos) # save for later
+    bodies_suffixes = get_suffixes(bodies_pos)  # save for later
     bodies_lemmas = get_lemmas(bodies_pos)
