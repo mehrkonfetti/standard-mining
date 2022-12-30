@@ -1,4 +1,6 @@
 import sqlite3
+import pandas as pd
+import numpy
 from datetime import datetime
 import re
 import conf
@@ -66,6 +68,21 @@ def clean_dates(date_strs):
     output_dates = [datetime.strptime(
         date, "%Y-%m-%d %H:%M:%S.%f") for date in date_strs]
     return output_dates
+
+
+def split_data():
+    connection_corpus = sqlite3.connect(conf.CORPUSDB)  # load corpus database
+    df = pd.read_sql_query("SELECT * FROM Articles;", connection_corpus)
+
+    # split articles in test and training
+    numpy.random.seed(123456)
+    shuffled_articles = df.iloc[numpy.random.permutation(df.index)].reset_index(drop=True)
+    shuffled_articles['Path'] = shuffled_articles['Path'].apply(clean_path)
+    shuffled_articles = shuffled_articles[shuffled_articles['Path'].notna()]
+    
+    training_data = shuffled_articles.iloc[0:4000]
+    test_data = shuffled_articles.iloc[7001:12087]
+    return training_data, test_data
 
 
 def tokenize_strings(list_of_strings):
@@ -162,8 +179,7 @@ def remove_stopwords(input_list):
 
     output_list = []
     for tokens in input_list:
-        tokens_cleaned = [token for token in tokens if (
-            token not in (stopwords, stopwords_english))]
+        tokens_cleaned = [token for token in tokens if token not in stopwords and token not in stopwords_english]
         output_list.append(tokens_cleaned)
     return output_list
 
@@ -285,6 +301,17 @@ def remove_html(list_of_strings):
 
 def clean_title(title):
     return remove_stopwords(tokenize_strings(title))
+
+
+def custom_preprocess(text):
+    tokenized = get_lemmas(get_pos_tags(remove_stopwords(tokenize_strings([text]))))[0]
+    return [token[0] for token in tokenized]
+
+
+def custom_preprocess_html(text):
+    tokenized = get_lemmas(get_pos_tags(remove_stopwords(tokenize_strings(remove_html([text])))))[0]
+    return [token[0] for token in tokenized]
+
 
 if __name__ == '__main__':
     connection_corpus = sqlite3.connect(conf.CORPUSDB)  # load corpus database

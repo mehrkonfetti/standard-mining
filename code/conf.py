@@ -3,7 +3,7 @@ import sqlite3
 TESTING = False  # when testing do not use the full data set
 CORPUSDB = 'data/million_post_corpus/corpus.sqlite3'
 ROW_FACTORY = sqlite3.Row  # use sqlite Rows, replace by None to read raw data instead
-STOPWORDREMOVER = "stop-words"  # option are "stop-words" and "german-stopwords-plain"
+STOPWORDREMOVER = "german-stopwords-plain"  # option are "stop-words" and "german-stopwords-plain"
 POS_TAGGER = "hanta"  # options are "hanta" and "someweta" and "stanford"
 STEMMING_OR_LEMMATIZING = "lemmatizing"  # options are "stemming" and "lemmatizing"
 STEMMER = "snowball"  # options are "cistem" and "snowball" and "snowball_swedish"
