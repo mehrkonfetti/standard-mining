@@ -21,16 +21,7 @@ if __name__ == '__main__':
 
     file = open("subprojects/german/austriazismen.txt", encoding="iso-8859-1")
     content = file.read()
-    austriazisms = content.split()
+    austriacisms = content.split()
 
-    austrian_tokens = [token for token in tokens if token in austriazisms]
+    austrian_tokens = [token for token in tokens if token in austriacisms]
     print(austrian_tokens)
-
-    titles_lemmatized = setup.get_lemmas(setup.get_pos_tags(setup.remove_stopwords(titles)))
-    bodies_lemmatized = setup.get_lemmas(setup.get_pos_tags(setup.remove_stopwords(bodies)))
-
-    tokens_lemmatized = [item for sublist in titles_lemmatized for item in sublist]
-    tokens_lemmatized.append([item for sublist in bodies_lemmatized for item in sublist])
-
-    austrian_tokens_lemmatized = [token for token in tokens_lemmatized if token in austriazisms]
-    print(austrian_tokens_lemmatized)
