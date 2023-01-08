@@ -1,6 +1,6 @@
 subprojects/million-post-corpus/*
-subprojects/stopwords/german_stopwords/*
-subprojects/stopwords/stop-words/*
+subprojects/german_stopwords/*
+subprojects/stop-words/*
 stanford-corenlp-full-2018-02-27/*
 subprojects/german/autocomplete.txt
 subprojects/german/german.dic

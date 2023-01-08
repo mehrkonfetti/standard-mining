@@ -2,8 +2,8 @@
 	path = subprojects/million-post-corpus
 	url = git@github.com:OFAI/million-post-corpus.git
 [submodule "subprojects/german_stopwords"]
-	path = subprojects/stopwords/german_stopwords
+	path = subprojects/german_stopwords
 	url = git@github.com:solariz/german_stopwords.git
 [submodule "subprojects/stop-words"]
-	path = subprojects/stopwords/stop-words
+	path = subprojects/stop-words
 	url = git@github.com:Alir3z4/stop-words.git

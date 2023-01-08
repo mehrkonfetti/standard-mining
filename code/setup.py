@@ -165,13 +165,13 @@ def remove_stopwords(input_list):
     returns: list of lists of strings
     """
     if conf.STOPWORDREMOVER == "stop-words":
-        file = open("subprojects/stopwords/stop-words/german.txt",
+        file = open("subprojects/stop-words/german.txt",
                     encoding="utf8")
         content = file.read()
         stopwords = content.split()
     elif conf.STOPWORDREMOVER == "german-stopwords-plain":
         file = open(
-            "subprojects/stopwords/german_stopwords/german_stopwords_plain.txt", encoding="utf8")
+            "subprojects/german_stopwords/german_stopwords_plain.txt", encoding="utf8")
         content = file.read()
         stopwords = content.split()
     else:
@@ -180,7 +180,7 @@ def remove_stopwords(input_list):
 
     # also add english stopwords
     file_english = open(
-        "subprojects/stopwords/stop-words/english.txt", encoding="utf8")
+        "subprojects/stop-words/english.txt", encoding="utf8")
     stopwords_english = file_english.read().split()
 
     output_list = []
