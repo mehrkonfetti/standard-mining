@@ -1,8 +1,9 @@
+from datetime import datetime
+import re
+
 import sqlite3
 import pandas as pd
 import numpy
-from datetime import datetime
-import re
 import conf
 import nltk
 import simplemma
@@ -71,16 +72,21 @@ def clean_dates(date_strs):
 
 
 def split_data():
+    """
+    takes: -
+    returns: two DataFrames with the training and test data respectively
+    """
     connection_corpus = sqlite3.connect(conf.CORPUSDB)  # load corpus database
     df = pd.read_sql_query("SELECT * FROM Articles;", connection_corpus)
 
     # split articles in test and training
     numpy.random.seed(123456)
-    shuffled_articles = df.iloc[numpy.random.permutation(df.index)].reset_index(drop=True)
+    shuffled_articles = df.iloc[numpy.random.permutation(
+        df.index)].reset_index(drop=True)
     shuffled_articles['Path'] = shuffled_articles['Path'].apply(clean_path)
     shuffled_articles = shuffled_articles[shuffled_articles['Path'].notna()]
-    
-    training_data = shuffled_articles.iloc[0:4000]
+
+    training_data = shuffled_articles.iloc[0:7000]
     test_data = shuffled_articles.iloc[7001:12087]
     return training_data, test_data
 
@@ -179,7 +185,8 @@ def remove_stopwords(input_list):
 
     output_list = []
     for tokens in input_list:
-        tokens_cleaned = [token for token in tokens if token not in stopwords and token not in stopwords_english]
+        tokens_cleaned = [
+            token for token in tokens if token not in stopwords and token not in stopwords_english]
         output_list.append(tokens_cleaned)
     return output_list
 
@@ -274,7 +281,6 @@ def get_lemmas(input_list):
             for lemmatuple in tuples:
                 lemma = lemmatizer.lemmatize(lemmatuple[0], lemmatuple[1])
                 if lemma is None:  # returns None for unknown words
-                    # TODO: explore further which words are unknown to it - does it recognize that english words are unknown eg
                     lemma = lemmatuple[0]
                 lemmatuples.append((lemma, lemmatuple[1]))
             output_list.append(lemmatuples)
@@ -300,16 +306,30 @@ def remove_html(list_of_strings):
 
 
 def clean_title(title):
+    """
+    takes: string with title
+    returns: list of tokens
+    """
     return remove_stopwords(tokenize_strings(title))
 
 
 def custom_preprocess(text):
-    tokenized = get_lemmas(get_pos_tags(remove_stopwords(tokenize_strings([text]))))[0]
+    """
+    takes: string
+    returns: list of tokens
+    """
+    tokenized = get_lemmas(get_pos_tags(
+        remove_stopwords(tokenize_strings([text]))))[0]
     return [token[0] for token in tokenized]
 
 
 def custom_preprocess_html(text):
-    tokenized = get_lemmas(get_pos_tags(remove_stopwords(tokenize_strings(remove_html([text])))))[0]
+    """
+    takes: string
+    returns: list of tokens
+    """
+    tokenized = get_lemmas(get_pos_tags(remove_stopwords(
+        tokenize_strings(remove_html([text])))))[0]
     return [token[0] for token in tokenized]
 
 
@@ -338,9 +358,12 @@ if __name__ == '__main__':
     titles_cleaned = remove_stopwords(titles_tokenized)
     titles_pos = get_pos_tags(titles_cleaned)
 
-    titles_stems = get_stems(titles_pos)
-    titles_suffixes = get_suffixes(titles_pos)  # save for later
-    titles_lemmas = get_lemmas(titles_pos)
+    if conf.STEMMING_OR_LEMMATIZING == "stemming":
+        titles_stems = get_stems(titles_pos)
+        titles_suffixes = get_suffixes(titles_pos)  # save for later
+    else:
+        titles_lemmas = get_lemmas(titles_pos)
+        print(titles_lemmas)
 
     bodies_rm_html = remove_html(bodies)
     bodies_tokenized = tokenize_strings(bodies_rm_html)
@@ -353,6 +376,8 @@ if __name__ == '__main__':
     bodies_cleaned = remove_stopwords(bodies_tokenized)
     bodies_pos = get_pos_tags(bodies_cleaned)
 
-    bodies_stems = get_stems(bodies_pos)
-    bodies_suffixes = get_suffixes(bodies_pos)  # save for later
-    bodies_lemmas = get_lemmas(bodies_pos)
+    if conf.STEMMING_OR_LEMMATIZING == "stemming":
+        bodies_stems = get_stems(bodies_pos)
+        bodies_suffixes = get_suffixes(bodies_pos)  # save for later
+    else:
+        bodies_lemmas = get_lemmas(bodies_pos)

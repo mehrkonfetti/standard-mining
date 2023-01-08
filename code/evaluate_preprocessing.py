@@ -49,18 +49,23 @@ def evaluate_pos(input_strs):
     """
     Compare different POS taggers
     """
-    evaluate_intersection = False  # whether to calculate the intersection and differences of the different taggers' results
-    plot_words_per_tag = False  # whether to draw the distribution of POS tags between the different taggers
-    test_stanford = False  # whether to test stanford - requires a local server and longer processing time
+    evaluate_intersection = True  # whether to calculate the intersection and differences of the different taggers' results
+    # whether to draw the distribution of POS tags between the different taggers
+    plot_words_per_tag = True
+    # whether to test stanford - requires a local server and longer processing time
+    test_stanford = False
 
     conf.POS_TAGGER = "hanta"
-    hanta_tags = setup.get_pos_tags(setup.remove_stopwords(setup.tokenize_strings(input_strs)))
+    hanta_tags = setup.get_pos_tags(
+        setup.remove_stopwords(setup.tokenize_strings(input_strs)))
     conf.POS_TAGGER = "someweta"
-    someweta_tags = setup.get_pos_tags(setup.remove_stopwords(setup.tokenize_strings(input_strs)))
-    
+    someweta_tags = setup.get_pos_tags(
+        setup.remove_stopwords(setup.tokenize_strings(input_strs)))
+
     if test_stanford:
         conf.POS_TAGGER = "stanford"
-        stanford_tags = setup.get_pos_tags(setup.remove_stopwords(setup.tokenize_strings(input_strs)))
+        stanford_tags = setup.get_pos_tags(
+            setup.remove_stopwords(setup.tokenize_strings(input_strs)))
 
     if evaluate_intersection:
         global_intersection = set()
@@ -93,7 +98,8 @@ def evaluate_pos(input_strs):
     global_someweta = [item for sublist in someweta_tags for item in sublist]
     global_someweta_words, global_someweta_tags = zip(*global_someweta)
     if test_stanford:
-        global_stanford = [item for sublist in stanford_tags for item in sublist]
+        global_stanford = [
+            item for sublist in stanford_tags for item in sublist]
         global_stanford_words, global_stanford_tags = zip(*global_stanford)
 
     if plot_words_per_tag:
@@ -111,7 +117,8 @@ def evaluate_pos(input_strs):
         plt.show()
         if test_stanford:
             plt.clf()
-            plt.bar(counter_stanford.keys(), counter_stanford.values(), width=0.8)
+            plt.bar(counter_stanford.keys(),
+                    counter_stanford.values(), width=0.8)
             plt.show()
 
 
