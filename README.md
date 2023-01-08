@@ -1,7 +1,17 @@
-# How to use
-1. To run the existing experiments on the data set, go to million_post_corpus/experiments and run './run.sh'
+# How to use project
+Unfortunately, the data set can not be included as a submodule and needs to be downloaded manually.
+Download the full data set from [here](https://ofai.github.io/million-post-corpus/) and place in data/.
+standard-mining
+-- code
+------ austriazismen.py
+------ ...
+-- data
+------ million_post_corpus
+---------- corpus.sqlite3
+---------- database_schema.md
+---------- ...
 
-
+# How to use stanford tagger
 cd ~
 wget http://nlp.stanford.edu/software/stanford-corenlp-full-2018-02-27.zip
 unzip stanford-corenlp-full-2018-02-27.zip
