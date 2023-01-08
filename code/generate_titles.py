@@ -1,11 +1,10 @@
-import pandas as pd
+import conf
+
 import string
 import numpy as np
-import json
 from keras.utils import pad_sequences
-from keras.layers import Embedding, LSTM, Dense, Dropout, Conv1D, MaxPooling1D
+from keras.layers import Embedding, LSTM, Dense, Dropout
 from keras.preprocessing.text import Tokenizer
-from keras.callbacks import EarlyStopping
 from keras.models import Sequential
 import keras.utils as ku
 import tensorflow as tf
@@ -132,7 +131,7 @@ if __name__ == '__main__':
     tf.random.set_seed(2)
     seed(1)
     connection_corpus = sqlite3.connect(
-        'drive/MyDrive/corpus.sqlite3')  # load corpus database
+        conf.CORPUSDB)  # load corpus database
     connection_corpus.row_factory = sqlite3.Row
     articles = get_articles(connection_corpus)
 
